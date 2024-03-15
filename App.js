@@ -18,6 +18,7 @@ import CustomStatusBar from './components/CustomStatusBar';
 import Profile from './Screens/Profile';
 import Propertie from './Screens/Propertie';
 import MyBooking from './Screens/MyBooking';
+import usePushNotifications from './hooks/usePushNotifications';
 const MainStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Home" component={HomeScreen} />
@@ -32,6 +33,10 @@ const MainStack = () => (
 );
 
 export default function App() {
+  const expoPushToken = usePushNotifications(); // Call the custom hook
+if(expoPushToken){
+  console.log("token : ",expoPushToken);
+}
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [userId, setUserId] = useState(null);
 
