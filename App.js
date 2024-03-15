@@ -1,111 +1,174 @@
-import { useState, useEffect, useRef } from 'react';
-import { Text, View, Button, Platform } from 'react-native';
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
+import React, { useState,useEffect } from 'react';
+import { View, Text, StyleSheet,Image,TouchableOpacity,StatusBar  } from "react-native";
+import { Entypo  ,AntDesign,Feather ,Ionicons   } from '@expo/vector-icons';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from './components/HomeScreen';
+import MessagesScreen from './Screens/MessagesScreen';
+import MenuScreen from './Screens/MenuScreen';
+import CustomModal from './components/CustomModal';
+import Details from './components/Details';
+import SignInScreen from './components/SignInScreen';
+import WhishListScreen from './Screens/WhishListScreen';
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+import CustomStatusBar from './components/CustomStatusBar';
+import Profile from './Screens/Profile';
+import Propertie from './Screens/Propertie';
+import MyBooking from './Screens/MyBooking';
+const MainStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Home" component={HomeScreen} />
+    <Stack.Screen name="Details" component={Details}  options={{ presentation: 'modal' }}/>
+    
+    <Stack.Screen name="Profile" component={Profile}  />
+    <Stack.Screen name="Propertie" component={Propertie}  />
+    <Stack.Screen name="MyBooking" component={MyBooking}  />
 
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
-
-
-// Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
-async function sendPushNotification(expoPushToken) {
-  const message = {
-    to: expoPushToken,
-    sound: 'default',
-    title: 'Original Title',
-    body: 'And here is the body!',
-    data: { someData: 'goes here' },
-  };
-
-  await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Accept-encoding': 'gzip, deflate',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(message),
-  });
-}
-
-async function registerForPushNotificationsAsync() {
-  let token;
-
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
-
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
-      return;
-    }
-    token = await Notifications.getExpoPushTokenAsync({
-      projectId: Constants.expoConfig.extra.eas.projectId,
-    });
-    console.log(token);
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
-
-  return token.data;
-}
+  </Stack.Navigator>
+);
 
 export default function App() {
-  const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [userId, setUserId] = useState(null);
 
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
-
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
-
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
-
+  const handleSignInSuccess = (userId) => {
+    setUserId(userId);
+  };
+0
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }}>
-      <Text>Your expo push token: {expoPushToken}</Text>
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Title: {notification && notification.request.content.title} </Text>
-        <Text>Body: {notification && notification.request.content.body}</Text>
-        <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
+    <NavigationContainer>
+      <CustomStatusBar>
+      {userId != null ? (
+        <Tab.Navigator
+          screenOptions={{
+            tabBarShowLabel: false,
+            tabBarStyle: [{ display: 'flex' }, null],
+            headerShown: false,
+            tabBarStyle: {
+              position:'absolute',
+              height:70,
+              left:20,
+              right:20,
+              elevation:0,
+              borderRadius:15,
+              ...style.shadow
+            }
+            
+          }}>
+     <Tab.Screen 
+  name="Home" 
+  component={MainStack} 
+  options={{
+    tabBarIcon: ({ focused }) => (
+      <View style={{ alignItems: "center", justifyContent: "center", top: 0 }}>
+        <AntDesign  
+          name="home" 
+          size={30} 
+          color={focused ? '#e32f45' : '#748c94'} 
+        />
       </View>
-      <Button
-        title="Press to Send Notification"
-        onPress={async () => {
-          await sendPushNotification(expoPushToken);
-        }}
-      />
-    </View>
+    )
+  }} 
+/>
+<Tab.Screen 
+  name="Wish List" 
+  component={WhishListScreen} 
+  options={{
+    tabBarIcon: ({ focused }) => (
+      <View style={{ alignItems: "center", justifyContent: "center", top: 0 }}>
+        <Ionicons   
+          name="heart" 
+          size={30} 
+          color={focused ? '#e32f45' : '#748c94'} 
+        />
+      </View>
+    )
+  }} 
+/>
+          <Tab.Screen
+            name="Messages"
+            component={MessagesScreen}
+            listeners={({ navigation }) => ({
+              tabPress: (event) => {
+                event.preventDefault();
+                setIsModalVisible(true);
+              },
+            })}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View style={{ alignItems: "center", justifyContent: "center", top:-25, backgroundColor:'#e32f45',borderRadius:50 }}>
+                  <AntDesign 
+                    name="plus" 
+                    size={55} 
+                    color="white"
+                    
+                  />
+                  
+                </View>
+              )
+            }} 
+          />
+
+<Tab.Screen 
+  name="Message" 
+  component={MessagesScreen} 
+  options={{
+    tabBarIcon: ({ focused }) => (
+      <View style={{ alignItems: "center", justifyContent: "center", top: 0 }}>
+        <Feather 
+          name="message-square" 
+          size={30} 
+          color={focused ? '#e32f45' : '#748c94'} 
+        />
+     
+      </View>
+    )
+  }} 
+/>
+<Tab.Screen 
+  name="MenuScreen" 
+  component={MenuScreen} 
+  options={{
+    tabBarIcon: ({ focused }) => (
+      <View style={{ alignItems: "center", justifyContent: "center", top: 0 }}>
+        <Entypo 
+          name="menu" 
+          size={30} 
+          color={focused ? '#e32f45' : '#748c94'} 
+        />
+      </View>
+    )
+  }}
+  initialParams={{ handleSignInSuccess }} // Pass the handleSignInSuccess function as a prop
+/>
+
+        </Tab.Navigator>
+      ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="SignIn">
+            {(props) => <SignInScreen {...props} onSignInSuccess={handleSignInSuccess} />}
+          </Stack.Screen>
+          
+        </Stack.Navigator>
+      )}
+      </CustomStatusBar>
+      <CustomModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} />
+    </NavigationContainer>
   );
 }
+
+const style = StyleSheet.create({
+  shadow: {
+    shadowOffset: {
+      width:0,
+      height:10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation:5
+  }
+})
