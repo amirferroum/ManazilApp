@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const useNgrokUrl = () => {
-  const [ngrokUrl, setNgrokUrl] = useState('d6fc-105-106-241-193.ngrok-free.app');
+  const [ngrokUrl, setNgrokUrl] = useState('a92e-41-98-112-198.ngrok-free.app');
 
   const setUrl = (url) => {
     setNgrokUrl(url);

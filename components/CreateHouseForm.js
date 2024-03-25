@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
 import { View, Text, TextInput, Button, Image, StyleSheet } from "react-native";
+import { Picker } from '@react-native-picker/picker'; // Import Picker from @react-native-picker/picker
+
 import useNgrokUrl from '../hooks/useNgrokUrl';
 import LoadingSpinner from "./LoadingSpinner";
 import useAuthentication from "../hooks/useAuthentication";
@@ -21,6 +23,8 @@ const CreateHouseForm = ( {onClose}) => {
     description: "",
     price: "",
     numRooms: "",
+    category: 'Entire home/apartment', // Default category
+
     photos: [], // Add a new field to store selected photos
   });
   const [message, setMessage] = useState("");
@@ -64,7 +68,8 @@ const CreateHouseForm = ( {onClose}) => {
       formDataToSend.append("price", formData.price);
       formDataToSend.append("numRooms", formData.numRooms);
       formDataToSend.append("title", formData.title);
-      
+      formDataToSend.append("category", formData.category); // Append category to form data
+
       formData.photos.map((photo, index) => {
         formDataToSend.append(`photos`, {
           uri: photo,
@@ -133,6 +138,16 @@ const CreateHouseForm = ( {onClose}) => {
           onChangeText={(text) => handleChange("price", text)}
           keyboardType="numeric"
         />
+        <Text>Category:</Text>
+      <Picker
+        selectedValue={formData.category}
+        onValueChange={(itemValue, itemIndex) => handleChange('category', itemValue)}
+        style={{ borderWidth: 1, borderColor: 'black', borderRadius: 5, marginBottom: 10 }}
+      >
+        <Picker.Item label="Entire home/apartment" value="Entire home/apartment" />
+        <Picker.Item label="Private room" value="Private room" />
+        {/* Add more options as needed */}
+      </Picker>
         <TextInput
           style={styles.input}
           placeholder="Number of Rooms"
